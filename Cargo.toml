@@ -1,0 +1,11 @@
+[package]
+name = "macroquad-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+macroquad = "0.4"
+macroquad-tiled = "0.2.1"
+macroquad-platformer = "0.2.0"
+rapier2d = "0.17.0"
+rhai = { version = "1.19.0", default-features = false, features = [ "std", "f32_float" ] }
