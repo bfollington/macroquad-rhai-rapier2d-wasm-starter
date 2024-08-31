@@ -75,10 +75,11 @@ struct Animation {
 
 impl Animation {
     async fn new(json_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let json_data = fs::read_to_string(json_path)?;
+        let json_data = load_string(json_path).await?;
         let aseprite_data: AsepriteData = serde_json::from_str(&json_data)?;
         
         let texture = load_texture(&format!("assets/{}", aseprite_data.meta.image)).await?;
+        texture.set_filter(FilterMode::Nearest);
 
         // Convert HashMap to Vec, sorted by frame number
         let mut frames: Vec<_> = aseprite_data.frames.into_iter().collect();
@@ -106,6 +107,7 @@ impl Animation {
     }
 
     fn draw(&self, x: f32, y: f32) {
+        let scale = 10;
         let frame = &self.frames[self.current_frame];
         let source_rect = Rect::new(
             frame.frame.x as f32,
@@ -119,6 +121,7 @@ impl Animation {
             y,
             WHITE,
             DrawTextureParams {
+                dest_size: Some(vec2((frame.source_size.w * scale) as f32, (frame.source_size.h * scale)as f32)),
                 source: Some(source_rect),
                 ..Default::default()
             },
