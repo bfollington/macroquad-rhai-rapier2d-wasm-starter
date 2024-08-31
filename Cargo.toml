@@ -9,3 +9,5 @@ macroquad-tiled = "0.2.1"
 macroquad-platformer = "0.2.0"
 rapier2d = "0.17.0"
 rhai = { version = "1.19.0", default-features = false, features = [ "std", "f32_float" ] }
+serde_json = "1.0.96"
+serde = { version = "1.0.162", features = ["derive"] }
