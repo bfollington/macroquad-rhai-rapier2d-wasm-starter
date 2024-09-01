@@ -61,14 +61,40 @@ fn draw_rectangle_transformed(x: f32, y: f32, w: f32, h: f32, color: Color, tran
     draw_triangle(points[0], points[2], points[3], color);
 }
 
-#[macroquad::main("Nested Transform")]
+#[macroquad::main("Nested Transform with Shader")]
 async fn main() {
     let mut transform_stack = TransformStack::new();
+
+    let vert = load_string("assets/shaders/default_vert.glsl")
+        .await
+        .unwrap();
+    let frag = load_string("assets/shaders/default_frag.glsl")
+        .await
+        .unwrap();
+
+    // Create a material with our fragment shader
+    let material = load_material(
+        ShaderSource::Glsl {
+            vertex: vert.as_str(),
+            fragment: frag.as_str(),
+        },
+        MaterialParams {
+            uniforms: vec![
+                UniformDesc::new("iTime", UniformType::Float1),
+                UniformDesc::new("iResolution", UniformType::Float2),
+            ],
+            ..Default::default()
+        },
+    )
+    .unwrap();
 
     loop {
         clear_background(WHITE);
 
         let time = get_time() as f32;
+        gl_use_material(&material);
+        material.set_uniform("iTime", time);
+        material.set_uniform("iResolution", vec2(screen_width(), screen_height()));
 
         // Root transform
         let root_transform = Transform::new(
@@ -87,8 +113,9 @@ async fn main() {
 
         transform_stack.push(child_transform);
 
-        // Draw the child rectangle
-        draw_rectangle_transformed(-50.0, -50.0, 100.0, 100.0, BLUE, transform_stack.current());
+        // Draw the child rectangle with shader
+        let child_matrix = transform_stack.current();
+        draw_rectangle_transformed(-50.0, -50.0, 100.0, 100.0, WHITE, child_matrix);
 
         // Grandchild transform
         let grandchild_transform = Transform::new(vec2(100.0, 0.0), time * -3.0, Vec2::ONE * 0.5);
